@@ -2,10 +2,14 @@ package com.marduc812.workcalculator;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.CalendarContract;
+import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -30,11 +34,11 @@ import java.util.Date;
 /**
  * Created by marduc on 10/09/16.
  */
-public class TimeDatePick extends Activity implements View.OnClickListener,
+public class TimeDatePick extends AppCompatActivity implements View.OnClickListener,
         TimePickerDialog.OnTimeSetListener,
         DatePickerDialog.OnDateSetListener {
 
-    Button dateadd,leavedate,endwork;
+
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -57,19 +61,19 @@ public class TimeDatePick extends Activity implements View.OnClickListener,
     TextView EndDay;
     Switch switcher;
     long extra_day;
-    ListView listview;
-    // Stats variables
+
     long total_hours_worked, Weekly_hours_worked,longest_shift,average_shift,monthly_hours;
     float total_income,weekly_income,highest_income,average_income,monthly_income;
     int times_worked;
 
 
-    Boolean starttimeset,startdateset,endtimeset,enddateset;
+
     private long start_time_ms;
     private String start_time,start_only_time;
     private int weekofyear,last_day;
     private boolean working;
     private float totalincomefloat;
+    private String name;
 
 
     @Override
@@ -81,6 +85,7 @@ public class TimeDatePick extends Activity implements View.OnClickListener,
         income = Float.valueOf(getPrefs.getString("income_per_hour", "10"));
         currency = getPrefs.getString("currency", "€");
         extra_day=0;
+        name = getPrefs.getString("work_title","Shift");
         esec = ssec = csec = 0; // Den me endiaferoun ta deuterolepta
         home = new HomeFragment();
 
@@ -91,17 +96,9 @@ public class TimeDatePick extends Activity implements View.OnClickListener,
         switcher = (Switch) findViewById(R.id.switch1);
         listView = (ListView) findViewById(R.id.listView3);
 
-        //start = (Button) findViewById(R.id.button);
-        //end = (Button) findViewById(R.id.button2);
 
         add_shift = (Button) findViewById(R.id.button);
 
-        /*StartTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                
-            }
-        });*/
 
         Calendar calendar = Calendar.getInstance();
         sday = eday = cday = calendar.get(Calendar.DAY_OF_MONTH);
@@ -144,7 +141,7 @@ public class TimeDatePick extends Activity implements View.OnClickListener,
                 monthly_hours+=end_time-start_time_l;
                 checkifLongest(end_time-start_time_l);
                 checkifHighest(totalincomefloat);
-
+                CreateCalendarEvent();
                 dbcon.insertData(String.valueOf(sday),monthfromnum(smonth) +"/"+ syear,shour+":"+home.zeroInfront(smin)+":00",time_worked,totalincome+""+currency);
                 Toast.makeText(getApplicationContext(),"Shift Successfully added to your history",Toast.LENGTH_SHORT).show();
                 finish();
@@ -152,6 +149,8 @@ public class TimeDatePick extends Activity implements View.OnClickListener,
 
             }
         });
+
+
 
         StartTime.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -225,6 +224,27 @@ public class TimeDatePick extends Activity implements View.OnClickListener,
         if (elapsed_time_ms>longest_shift)
         {
             longest_shift = elapsed_time_ms;
+        }
+    }
+
+    private void CreateCalendarEvent(){
+
+        SharedPreferences getPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Boolean eventCalendar = getPrefs.getBoolean("calendar_event", true);
+
+
+        if (eventCalendar)
+        {
+            Intent calIntent = new Intent(Intent.ACTION_INSERT);
+            calIntent.setData(CalendarContract.Events.CONTENT_URI);
+            calIntent.setType("vnd.android.cursor.item/event");
+            calIntent.putExtra(CalendarContract.Events.TITLE, name);
+            calIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, start_time_ms);
+            calIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, end_time);
+            calIntent.putExtra(CalendarContract.Events.ACCESS_LEVEL, CalendarContract.Events.ACCESS_PRIVATE);
+            calIntent.putExtra(CalendarContract.Events.AVAILABILITY, CalendarContract.Events.AVAILABILITY_BUSY);
+            calIntent.putExtra(CalendarContract.Events.DESCRIPTION, "You earned " + new DecimalFormat("##.##").format((totalincomefloat))+currency + " in " + home.long2mins(end_time-start_time_ms));
+            startActivity(calIntent);
         }
     }
 
