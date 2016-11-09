@@ -12,7 +12,6 @@ public class Stats_ad {
         this.titles = title;
         this.values = value;
 
-
     }
 
     public String getTitles()
@@ -24,6 +23,7 @@ public class Stats_ad {
     {
         return values;
     }
+
 
 
 }

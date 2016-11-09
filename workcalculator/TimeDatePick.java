@@ -239,11 +239,11 @@ public class TimeDatePick extends AppCompatActivity implements View.OnClickListe
             calIntent.setData(CalendarContract.Events.CONTENT_URI);
             calIntent.setType("vnd.android.cursor.item/event");
             calIntent.putExtra(CalendarContract.Events.TITLE, name);
-            calIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, start_time_ms);
+            calIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, start_time_l);
             calIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, end_time);
             calIntent.putExtra(CalendarContract.Events.ACCESS_LEVEL, CalendarContract.Events.ACCESS_PRIVATE);
             calIntent.putExtra(CalendarContract.Events.AVAILABILITY, CalendarContract.Events.AVAILABILITY_BUSY);
-            calIntent.putExtra(CalendarContract.Events.DESCRIPTION, "You earned " + new DecimalFormat("##.##").format((totalincomefloat))+currency + " in " + home.long2mins(end_time-start_time_ms));
+            calIntent.putExtra(CalendarContract.Events.DESCRIPTION, "You earned " + new DecimalFormat("##.##").format((totalincomefloat))+currency + " in " + home.long2mins(end_time-start_time_l));
             startActivity(calIntent);
         }
     }

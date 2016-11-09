@@ -31,7 +31,7 @@ public class DatasAdapter extends RecyclerView.Adapter<DatasAdapter.ViewHolder> 
 
     @Override
     public DatasAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                        int viewType) {
+                                                      int viewType) {
         // create a new view
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.stats_card_row, parent, false);
@@ -106,4 +106,3 @@ public class DatasAdapter extends RecyclerView.Adapter<DatasAdapter.ViewHolder> 
         public void itemClicked(View view, int pos);
     }
 }
-

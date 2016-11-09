@@ -348,8 +348,9 @@ public class HomeFragment extends Fragment {
             SharedPreferences getPrefs = PreferenceManager.getDefaultSharedPreferences(getContext());
             Boolean weekChange = getPrefs.getBoolean("week_change", true);
             Toast.makeText(getContext(), "Week Change " + weekChange, Toast.LENGTH_SHORT).show();
-            if (weekChange)
-            {
+            if (weekChange) {
+                if (monthly_income != 0)
+                {
                 new MaterialDialog.Builder(getContext())
                         .title("Do you want to restart your monthly stats?")
                         .items("You can always restart stats Manually at any time")
@@ -364,6 +365,7 @@ public class HomeFragment extends Fragment {
                                         }})
                         .negativeText("Cancel")
                         .show();
+                }
 
                 }
             else
@@ -388,8 +390,12 @@ public class HomeFragment extends Fragment {
         int day = cal.get(Calendar.DAY_OF_WEEK);
         if (day==weekstartday) // H mera pou xekinaei h vdomada
         {
-            WeekChange();
-            weekofyear=weekofyearSP;
+            if (weekofyear!=weekofyearSP) // an exei allaxei h vdomada
+            {
+                WeekChange();
+                Toast.makeText(getActivity(),"WeekofYear" + weekofyear + "\n weekofyearsp" + weekofyearSP,Toast.LENGTH_SHORT).show();
+                weekofyear = weekofyearSP;
+            }
 
         }
         else
@@ -400,7 +406,8 @@ public class HomeFragment extends Fragment {
                 {
                     WeekChange();
                 }
-                Toast.makeText(getContext(),"New Week \n" + "weekofyear: "+ weekofyear +"\nweekofyearSP "+ weekofyearSP,Toast.LENGTH_SHORT).show();
+
+
             }
             //Toast.makeText(getContext(),"Today is NOT a restart day",Toast.LENGTH_SHORT).show();
             weekofyear=weekofyearSP;
@@ -417,20 +424,30 @@ public class HomeFragment extends Fragment {
 
         if (weekChange)
         {
-            new MaterialDialog.Builder(getContext())
-                    .title("Do you want to restart your Weekly stats?")
-                    .items("Seems like your restart day passed")
-                    .positiveText("Restart")
-                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            //Toast.makeText(getContext(), "Which: " + which, Toast.LENGTH_SHORT).show();
-                            weekly_income=0;
-                            Weekly_hours_worked=0;
-                            Toast.makeText(getContext(),"New Week Started",Toast.LENGTH_SHORT).show();
-                        }})
-                    .negativeText("Cancel")
-                    .show();
+            if (weekly_income!=0 || weekofyearSP!=weekofyear)
+            {
+                new MaterialDialog.Builder(getContext())
+                        .title("Do you want to restart your Weekly stats?")
+                        .items("Seems like your restart day passed")
+                        .positiveText("Restart")
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                //Toast.makeText(getContext(), "Which: " + which, Toast.LENGTH_SHORT).show();
+                                weekly_income = 0;
+                                Weekly_hours_worked = 0;
+                                Toast.makeText(getContext(), "New Week Started", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .negativeText("Cancel")
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                weekofyear=weekofyearSP;
+                            }
+                        })
+                        .show();
+            }
 
         }
         else

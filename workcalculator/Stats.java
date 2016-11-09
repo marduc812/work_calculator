@@ -1,15 +1,11 @@
 package com.marduc812.workcalculator;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,11 +14,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.yalantis.phoenix.PullToRefreshView;
 
 import java.text.DecimalFormat;
 
@@ -33,9 +29,10 @@ public class Stats extends AppCompatActivity{
 
     // Stats variables
     long total_hours_worked, Weekly_hours_worked,longest_shift,average_shift,monthly_hours;
-    float total_income,weekly_income,highest_income,average_income,monthly_income;
+    float total_income,weekly_income,highest_income,average_income,monthly_income, weekly_goal;
     int times_worked;
     HomeFragment home;
+
 
     // Other fields
     Long start_time_ms,elapsed_time_ms,finish_time_ms;
@@ -49,12 +46,20 @@ public class Stats extends AppCompatActivity{
     protected RecyclerView.Adapter DatasAdapter;
     protected RecyclerView.LayoutManager mLayoutManager;
 
+    TextView current_prog, percentProg;
+    ProgressBar progressBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.stats);
 
+        current_prog = (TextView) findViewById(R.id.textView16);
+        percentProg = (TextView) findViewById(R.id.textView17);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
+
+        ((AppCompatActivity)this).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         update();
 
@@ -79,47 +84,15 @@ public class Stats extends AppCompatActivity{
 
                         if (position==0)
                         {
-                            clearDialog("Times worked",position);
+                            clearDialog("Week Stats",position);
                         }
                         else if (position==1)
                         {
-                            clearDialog("Total Hours",position);
+                            clearDialog("Month Stats",position);
                         }
                         else if (position==2)
                         {
-                            clearDialog("Weekly Hours",position);
-                        }
-                        else if (position==3)
-                        {
-                            clearDialog("Longest Shift",position);
-                        }
-                        else if (position==4)
-                        {
-                            clearDialog("Average Shift",position);
-                        }
-                        else if (position==5)
-                        {
-                            clearDialog("Monthly Hours",position);
-                        }
-                        else if (position==6)
-                        {
-                            clearDialog("Total Income",position);
-                        }
-                        else if (position==7)
-                        {
-                            clearDialog("Weekly Income",position);
-                        }
-                        else if (position==8)
-                        {
-                            clearDialog("Highest Income",position);
-                        }
-                        else if (position==9)
-                        {
-                            clearDialog("Average Income",position);
-                        }
-                        else if (position==10)
-                        {
-                            clearDialog("Monthly Income",position);
+                            clearDialog("Extra Stats",position);
                         }
                     }
                 })
@@ -138,51 +111,27 @@ public class Stats extends AppCompatActivity{
 
                         if (position==0)
                         {
-                            times_worked=0;
+                            Weekly_hours_worked=0;
+                            weekly_income=0;
+
                         }
                         else if (position==1)
                         {
-                            total_hours_worked=0;
-
+                            monthly_hours=0;
+                            monthly_income=0;
                         }
                         else if (position==2)
                         {
-                            Weekly_hours_worked=0;
-                        }
-                        else if (position==3)
-                        {
+                            times_worked=0;
+                            total_hours_worked=0;
                             longest_shift=0;
-                        }
-                        else if (position==4)
-                        {
                             average_shift=0;
-                        }
-                        else if (position==5)
-                        {
-                            monthly_hours=0;
-                        }
-                        else if (position==6)
-                        {
                             total_income=0;
-                        }
-                        else if (position==7)
-                        {
-                            weekly_income=0;
-                        }
-                        else if (position==8)
-                        {
                             highest_income=0;
-                        }
-                        else if (position==9)
-                        {
                             average_income=0;
                         }
-                        else if (position==10)
-                        {
-                            monthly_income=0;
-                        }
                         update();
-                        
+
                     }})
                 .show();
 
@@ -203,26 +152,33 @@ public class Stats extends AppCompatActivity{
             average_shift = total_hours_worked/times_worked;
         }
 
+        // Make progress bar
         SharedPreferences getPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-
-
         Currency = getPrefs.getString("currency","$");
+        weekly_goal = Float.valueOf(getPrefs.getString("weeklygoal","100"));
+
+        current_prog.setText(new DecimalFormat("##.##").format(weekly_income) + " / " +new DecimalFormat("##.##").format(weekly_goal)+Currency);
+        float percent = (weekly_income/weekly_goal)*100;
+        percentProg.setText(new DecimalFormat("##.##").format(percent)+"%");
+        progressBar.setProgress((int) percent);
 
         home = new HomeFragment();
 
         final Stats_ad stats_ad[] =
                 {
-                        new Stats_ad("Times Worked",String.valueOf(times_worked)),
-                        new Stats_ad("Total Hours",String.valueOf(home.long2mins(total_hours_worked))),
-                        new Stats_ad("Weekly Hours",String.valueOf(home.long2mins(Weekly_hours_worked))),
-                        new Stats_ad("Longest Shift",String.valueOf(home.long2mins(longest_shift))),
-                        new Stats_ad("Average Shift",String.valueOf(home.long2mins(average_shift))),
-                        new Stats_ad("Monthly Hours",String.valueOf(home.long2mins(monthly_hours))),
-                        new Stats_ad("Total Income",String.valueOf(new DecimalFormat("##.##").format((total_income)))+Currency),
-                        new Stats_ad("Weekly Income",String.valueOf(new DecimalFormat("##.##").format((weekly_income)))+Currency),
-                        new Stats_ad("Highest Income",String.valueOf(new DecimalFormat("##.##").format((highest_income)))+Currency),
-                        new Stats_ad("Average Income",String.valueOf(new DecimalFormat("##.##").format((average_income)))+Currency),
-                        new Stats_ad("Monthly Income",String.valueOf(new DecimalFormat("##.##").format((monthly_income)))+Currency),
+
+                        new Stats_ad("Week Stats","Hours: "+ String.valueOf(home.long2mins(Weekly_hours_worked))  +
+                                "\nIncome: " + String.valueOf(new DecimalFormat("##.##").format(weekly_income)) + Currency),
+                        new Stats_ad("Month Stats","Hours: "+ String.valueOf(home.long2mins(monthly_hours))  +
+                                "\nIncome: " + String.valueOf(new DecimalFormat("##.##").format(monthly_income))+Currency),
+                        new Stats_ad("Extra Stats",
+                                "Times Worked: " + String.valueOf(times_worked) +
+                                "\nTotal Hours: "+ String.valueOf(home.long2mins(total_hours_worked))  +
+                                "\nTotal Income: " + String.valueOf(new DecimalFormat("##.##").format(total_income))+Currency +
+                                "\nLongest Shift: " + String.valueOf(home.long2mins(longest_shift)) +
+                                "\nHighest Income: " + String.valueOf(new DecimalFormat("##.##").format(highest_income)) + Currency +
+                                "\nAverage Shift: " + String.valueOf(home.long2mins(average_shift)) +
+                                "\nAverage Income: " + String.valueOf(new DecimalFormat("##.##").format(average_income)) + Currency)
                 };
 
         DatasAdapter = new DatasAdapter(stats_ad);
@@ -299,6 +255,8 @@ public class Stats extends AppCompatActivity{
         last_day = settings.getInt("last_days", 2);
         weekofyear = settings.getInt("week_of_year",0);
 
+        //
+
         update();
         DatasAdapter.notifyDataSetChanged();
         recyclerView.setAdapter(DatasAdapter);
@@ -320,17 +278,17 @@ public class Stats extends AppCompatActivity{
         {
             case R.id.stats:
             {
-                    times_worked=0;
-                    total_hours_worked=0;
-                    Weekly_hours_worked=0;
-                    longest_shift=0;
-                    average_shift=0;
-                    monthly_hours=0;
-                    total_income=0;
-                    weekly_income=0;
-                    highest_income=0;
-                    average_income=0;
-                    monthly_income=0;
+                times_worked=0;
+                total_hours_worked=0;
+                Weekly_hours_worked=0;
+                longest_shift=0;
+                average_shift=0;
+                monthly_hours=0;
+                total_income=0;
+                weekly_income=0;
+                highest_income=0;
+                average_income=0;
+                monthly_income=0;
                 update();
                 return true;
             }

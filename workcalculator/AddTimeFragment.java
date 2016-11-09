@@ -98,25 +98,7 @@ public class AddTimeFragment extends Fragment {
             average_income = total_income/times_worked;
             average_shift = total_hours_worked/times_worked;
         }
-        
 
-
-        final Stats_ad stats_ad[] =
-        {
-                new Stats_ad("Times Worked",String.valueOf(times_worked)),
-                new Stats_ad("Total Hours",String.valueOf(total_hours_worked)),
-                new Stats_ad("Weekly Hours",String.valueOf(Weekly_hours_worked)),
-                new Stats_ad("Longest Shift",String.valueOf(longest_shift)),
-                new Stats_ad("Average Shift",String.valueOf(average_shift)),
-                new Stats_ad("Monthly Hours",String.valueOf(monthly_hours)),
-                new Stats_ad("Total Income",String.valueOf(total_income)),
-                new Stats_ad("Weekly Income",String.valueOf(weekly_income)),
-                new Stats_ad("Highest Income",String.valueOf(highest_income)),
-                new Stats_ad("Average Income",String.valueOf(average_income)),
-                new Stats_ad("Monthly Income",String.valueOf(monthly_income)),
-        };
-
-        DatasAdapter = new DatasAdapter(stats_ad);
 
     }
 
